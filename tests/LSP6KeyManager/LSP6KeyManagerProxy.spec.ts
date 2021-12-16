@@ -401,7 +401,7 @@ describe("KeyManager + LSP3 Account as Proxies", () => {
         await proxyKeyManager.connect(app).execute(dangerousPayload);
       } catch (error) {
         expect(error.message).toMatch(
-          NotAuthorisedError("CHANGEPERMISSIONS", app.address)
+          NotAuthorisedError(app.address, "CHANGEPERMISSIONS")
         );
       }
     });
@@ -508,7 +508,7 @@ describe("KeyManager + LSP3 Account as Proxies", () => {
         await proxyKeyManager.connect(app).execute(executePayload);
       } catch (error) {
         expect(error.message).toMatch(
-          NotAuthorisedError("STATICCALL", app.address)
+          NotAuthorisedError(app.address, "STATICCALL")
         );
       }
     });
@@ -527,7 +527,7 @@ describe("KeyManager + LSP3 Account as Proxies", () => {
       await expect(
         proxyKeyManager.connect(owner).execute(executePayload)
       ).toBeRevertedWith(
-        "KeyManager:_verifyCanExecute: operation 4 `DELEGATECALL` not supported"
+        "_verifyCanExecute: operation 4 `DELEGATECALL` not supported"
       );
     });
 
@@ -546,7 +546,7 @@ describe("KeyManager + LSP3 Account as Proxies", () => {
         await proxyKeyManager.connect(app).execute(executePayload);
       } catch (error) {
         expect(error.message).toMatch(
-          NotAuthorisedError("CREATE", app.address)
+          NotAuthorisedError(app.address, "CREATE")
         );
       }
     });
@@ -611,7 +611,7 @@ describe("KeyManager + LSP3 Account as Proxies", () => {
         await proxyKeyManager.connect(app).execute(transferPayload);
       } catch (error) {
         expect(error.message).toMatch(
-          NotAuthorisedError("TRANSFERVALUE", app.address)
+          NotAuthorisedError(app.address, "TRANSFERVALUE")
         );
       }
 
@@ -902,16 +902,14 @@ describe("KeyManager + LSP3 Account as Proxies", () => {
       );
 
       await expect(proxyKeyManager.execute(payload)).toBeRevertedWith(
-        "KeyManager:_extractPermissionFromOperation: invalid operation type"
+        "_extractPermissionFromOperation: invalid operation type"
       );
     });
 
     it("Should revert because calling an unexisting function in ERC725", async () => {
       await expect(
         proxyKeyManager.execute("0xbad000000000000000000000000bad")
-      ).toBeRevertedWith(
-        "KeyManager:_verifyPermissions: unknown function selector on ERC725 account"
-      );
+      ).toBeRevertedWith("_verifyPermissions: unknown ERC725 selector");
     });
 
     it("Should revert with a revert reason string from TargetContract", async () => {
@@ -1516,7 +1514,7 @@ describe("KeyManager + LSP3 Account as Proxies", () => {
       await expect(
         proxyKeyManager.connect(accounts[6]).execute(executePayload)
       ).toBeRevertedWith(
-        "KeyManager:_getAddressPermissions: no permissions set for this address"
+        "LSP6Utils:getPermissionsFor: no permissions set for this address"
       );
     });
 
@@ -1632,7 +1630,7 @@ describe("KeyManager + LSP3 Account as Proxies", () => {
           executeRelayCallPayload,
           signature
         )
-      ).toBeRevertedWith("KeyManager:executeRelayCall: Incorrect nonce");
+      ).toBeRevertedWith("executeRelayCall: Invalid nonce");
     });
   });
 });

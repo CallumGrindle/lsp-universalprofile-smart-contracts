@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.2-alpha.1.0](https://github.com/lukso-network/universalprofile-smart-contracts/compare/v0.4.1...v0.4.2-alpha.1.0) (2021-12-16)
+
+
+### Bug Fixes
+
+* :wastebasket: remove deprecated key `SupportedStandards:LSP4DigitalCertificate` ([59844f6](https://github.com/lukso-network/universalprofile-smart-contracts/commit/59844f602dd30f6e2ef7f0dae75b57f9cf2ed704))
+* change make-ios script to ts file ([40ff091](https://github.com/lukso-network/universalprofile-smart-contracts/commit/40ff091444ced6488f11b55075ee9e029b9dbdae))
+* remove success check before emitting event ([cad39ae](https://github.com/lukso-network/universalprofile-smart-contracts/commit/cad39ae189f5757a50ff735d4067557b10ae7be8))
+
 ### [0.4.1](https://github.com/lukso-network/universalprofile-smart-contracts/compare/v0.4.0...v0.4.1) (2021-11-26)
 
 ## [0.4.0](https://github.com/lukso-network/universalprofile-smart-contracts/compare/v0.3.0...v0.4.0) (2021-11-26)

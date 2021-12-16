@@ -182,13 +182,13 @@ describe("Testing KeyManager's internal functions (KeyManagerHelper)", () => {
 
   describe("Reading User's permissions", () => {
     it("Should return 0xffff... for owner", async () => {
-      expect(await keyManagerHelper.getUserPermissions(owner.address)).toEqual(
-        ALL_PERMISSIONS_SET
-      ); // ALL_PERMISSIONS = "0xffff..."
+      expect(
+        await keyManagerHelper.getAddressPermissions(owner.address)
+      ).toEqual(ALL_PERMISSIONS_SET); // ALL_PERMISSIONS = "0xffff..."
     });
 
     it("Should return 0x....0c for app", async () => {
-      expect(await keyManagerHelper.getUserPermissions(app.address)).toEqual(
+      expect(await keyManagerHelper.getAddressPermissions(app.address)).toEqual(
         ethers.utils.hexZeroPad(PERMISSIONS.SETDATA + PERMISSIONS.CALL, 32)
       );
     });
@@ -196,11 +196,11 @@ describe("Testing KeyManager's internal functions (KeyManagerHelper)", () => {
 
   describe("Testing allowed permissions", () => {
     it("Should return true for operation setData", async () => {
-      let appPermissions = await keyManagerHelper.getUserPermissions(
+      let appPermissions = await keyManagerHelper.getAddressPermissions(
         app.address
       );
       expect(
-        await keyManagerHelper.isAllowed(
+        await keyManagerHelper.hasPermission(
           ethers.utils.hexZeroPad(PERMISSIONS.SETDATA, 32),
           appPermissions
         )
@@ -508,7 +508,7 @@ describe("KeyManager", () => {
         await keyManager.connect(app).execute(executePayload);
       } catch (error) {
         expect(error.message).toMatch(
-          NotAuthorisedError("STATICCALL", app.address)
+          NotAuthorisedError(app.address, "STATICCALL")
         );
       }
     });
@@ -527,7 +527,7 @@ describe("KeyManager", () => {
       await expect(
         keyManager.connect(owner).execute(executePayload)
       ).toBeRevertedWith(
-        "KeyManager:_verifyCanExecute: operation 4 `DELEGATECALL` not supported"
+        "_verifyCanExecute: operation 4 `DELEGATECALL` not supported"
       );
     });
 
@@ -546,7 +546,7 @@ describe("KeyManager", () => {
         await keyManager.connect(app).execute(executePayload);
       } catch (error) {
         expect(error.message).toMatch(
-          NotAuthorisedError("CREATE", app.address)
+          NotAuthorisedError(app.address, "CREATE")
         );
       }
     });
@@ -609,7 +609,7 @@ describe("KeyManager", () => {
         await keyManager.connect(app).execute(transferPayload);
       } catch (error) {
         expect(error.message).toMatch(
-          NotAuthorisedError("TRANSFERVALUE", app.address)
+          NotAuthorisedError(app.address, "TRANSFERVALUE")
         );
       }
 
@@ -902,16 +902,14 @@ describe("KeyManager", () => {
       ]);
 
       await expect(keyManager.execute(payload)).toBeRevertedWith(
-        "KeyManager:_extractPermissionFromOperation: invalid operation type"
+        "_extractPermissionFromOperation: invalid operation type"
       );
     });
 
     it("Should revert because calling an unexisting function in ERC725", async () => {
       await expect(
         keyManager.execute("0xbad000000000000000000000000bad")
-      ).toBeRevertedWith(
-        "KeyManager:_verifyPermissions: unknown function selector on ERC725 account"
-      );
+      ).toBeRevertedWith("_verifyPermissions: unknown ERC725 selector");
     });
 
     it("Should revert with a revert reason string from TargetContract", async () => {
@@ -1518,7 +1516,7 @@ describe("KeyManager", () => {
       await expect(
         keyManager.connect(accounts[6]).execute(executePayload)
       ).toBeRevertedWith(
-        "KeyManager:_getAddressPermissions: no permissions set for this address"
+        "LSP6Utils:getPermissionsFor: no permissions set for this address"
       );
     });
 
@@ -1633,7 +1631,7 @@ describe("KeyManager", () => {
           nonce,
           signature
         )
-      ).toBeRevertedWith("KeyManager:executeRelayCall: Incorrect nonce");
+      ).toBeRevertedWith("KeyManager:executeRelayCall: Invalid nonce");
     });
   });
 });
@@ -1741,7 +1739,7 @@ describe("SETDATA", () => {
           await keyManager.connect(cannotSetData).execute(payload);
         } catch (error) {
           expect(error.message).toMatch(
-            NotAuthorisedError("SETDATA", cannotSetData.address)
+            NotAuthorisedError(cannotSetData.address, "SETDATA")
           );
         }
       });
@@ -1951,7 +1949,7 @@ describe("SETDATA", () => {
           await keyManager.connect(cannotSetData).execute(payload);
         } catch (error) {
           expect(error.message).toMatch(
-            NotAuthorisedError("SETDATA", cannotSetData.address)
+            NotAuthorisedError(cannotSetData.address, "SETDATA")
           );
         }
       });
@@ -1981,7 +1979,7 @@ describe("SETDATA", () => {
           await keyManager.connect(cannotSetData).execute(payload);
         } catch (error) {
           expect(error.message).toMatch(
-            NotAuthorisedError("SETDATA", cannotSetData.address)
+            NotAuthorisedError(cannotSetData.address, "SETDATA")
           );
         }
       });
@@ -2021,7 +2019,7 @@ describe("SETDATA", () => {
           await keyManager.connect(cannotSetData).execute(payload);
         } catch (error) {
           expect(error.message).toMatch(
-            NotAuthorisedError("SETDATA", cannotSetData.address)
+            NotAuthorisedError(cannotSetData.address, "SETDATA")
           );
         }
       });
@@ -2158,8 +2156,8 @@ describe("CHANGE / ADD PERMISSIONS", () => {
         } catch (error) {
           expect(error.message).toMatch(
             NotAuthorisedError(
-              "CHANGEPERMISSIONS",
-              canOnlyAddPermissions.address
+              canOnlyAddPermissions.address,
+              "CHANGEPERMISSIONS"
             )
           );
         }
@@ -2188,8 +2186,8 @@ describe("CHANGE / ADD PERMISSIONS", () => {
         } catch (error) {
           expect(error.message).toMatch(
             NotAuthorisedError(
-              "ADDPERMISSIONS",
-              canOnlyChangePermissions.address
+              canOnlyChangePermissions.address,
+              "ADDPERMISSIONS"
             )
           );
         }
@@ -2228,12 +2226,14 @@ describe("CHANGE / ADD PERMISSIONS", () => {
         } catch (error) {
           expect(error.message).toMatch(
             NotAuthorisedError(
-              "ADDPERMISSIONS",
-              canOnlyChangePermissions.address
+              canOnlyChangePermissions.address,
+              "ADDPERMISSIONS"
             )
           );
         }
       });
+
+      it;
     });
   });
 });
@@ -2463,8 +2463,8 @@ describe("setting mixed keys (SETDATA + CHANGE / ADD PERMISSIONS)", () => {
       } catch (error) {
         expect(error.message).toMatch(
           NotAuthorisedError(
-            "CHANGEPERMISSIONS",
-            canSetDataAndAddPermissions.address
+            canSetDataAndAddPermissions.address,
+            "CHANGEPERMISSIONS"
           )
         );
       }
@@ -2502,8 +2502,8 @@ describe("setting mixed keys (SETDATA + CHANGE / ADD PERMISSIONS)", () => {
       } catch (error) {
         expect(error.message).toMatch(
           NotAuthorisedError(
-            "CHANGEPERMISSIONS",
-            canSetDataAndAddPermissions.address
+            canSetDataAndAddPermissions.address,
+            "CHANGEPERMISSIONS"
           )
         );
       }
@@ -2541,8 +2541,8 @@ describe("setting mixed keys (SETDATA + CHANGE / ADD PERMISSIONS)", () => {
       } catch (error) {
         expect(error.message).toMatch(
           NotAuthorisedError(
-            "ADDPERMISSIONS",
-            canSetDataAndAddPermissions.address
+            canSetDataAndAddPermissions.address,
+            "ADDPERMISSIONS"
           )
         );
       }
@@ -2613,11 +2613,92 @@ describe("setting mixed keys (SETDATA + CHANGE / ADD PERMISSIONS)", () => {
       } catch (error) {
         expect(error.message).toMatch(
           NotAuthorisedError(
-            "CHANGEPERMISSIONS",
-            canSetDataAndAddPermissions.address
+            canSetDataAndAddPermissions.address,
+            "CHANGEPERMISSIONS"
           )
         );
       }
+    });
+  });
+});
+
+describe("Testing permissions of multiple empty bytes length", () => {
+  let abiCoder;
+  let accounts: SignerWithAddress[] = [];
+
+  let owner: SignerWithAddress,
+    moreThan32EmptyBytes: SignerWithAddress,
+    lessThan32EmptyBytes: SignerWithAddress,
+    oneEmptyByte: SignerWithAddress;
+
+  let universalProfile: UniversalProfile, keyManagerHelper: KeyManagerHelper;
+
+  beforeAll(async () => {
+    abiCoder = await ethers.utils.defaultAbiCoder;
+    accounts = await ethers.getSigners();
+
+    owner = accounts[0];
+    moreThan32EmptyBytes = accounts[1];
+    lessThan32EmptyBytes = accounts[2];
+    oneEmptyByte = accounts[3];
+
+    universalProfile = await new UniversalProfile__factory(owner).deploy(
+      owner.address
+    );
+
+    keyManagerHelper = await new KeyManagerHelper__factory(owner).deploy(
+      universalProfile.address
+    );
+
+    await universalProfile
+      .connect(owner)
+      .setData(
+        [
+          ERC725YKeys.LSP6["AddressPermissions:Permissions:"] +
+            owner.address.substr(2),
+          ERC725YKeys.LSP6["AddressPermissions:Permissions:"] +
+            moreThan32EmptyBytes.address.substr(2),
+          ERC725YKeys.LSP6["AddressPermissions:Permissions:"] +
+            lessThan32EmptyBytes.address.substr(2),
+          ERC725YKeys.LSP6["AddressPermissions:Permissions:"] +
+            oneEmptyByte.address.substr(2),
+        ],
+        [
+          ALL_PERMISSIONS_SET,
+          "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+          "0x000000000000000000000000000000",
+          "0x00",
+        ]
+      );
+
+    await universalProfile
+      .connect(owner)
+      .transferOwnership(keyManagerHelper.address);
+  });
+
+  describe("reading permissions", () => {
+    it("should revert when reading permissions stored as more than 32 empty bytes", async () => {
+      await expect(
+        keyManagerHelper.getAddressPermissions(moreThan32EmptyBytes.address)
+      ).toBeRevertedWith(
+        "LSP6Utils:getPermissionsFor: no permissions set for this address"
+      );
+    });
+
+    it("should revert when reading permissions stored as less than 32 empty bytes", async () => {
+      await expect(
+        keyManagerHelper.getAddressPermissions(lessThan32EmptyBytes.address)
+      ).toBeRevertedWith(
+        "LSP6Utils:getPermissionsFor: no permissions set for this address"
+      );
+    });
+
+    it("should revert when reading permissions stored as one empty byte", async () => {
+      await expect(
+        keyManagerHelper.getAddressPermissions(oneEmptyByte.address)
+      ).toBeRevertedWith(
+        "LSP6Utils:getPermissionsFor: no permissions set for this address"
+      );
     });
   });
 });
