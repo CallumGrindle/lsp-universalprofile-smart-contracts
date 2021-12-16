@@ -33,15 +33,15 @@ jobs:
           git push --set-upstream origin develop tag ${{ env.APP_VERSION }}
 
       # Android artifacts
-      - name: Download artifact
-        uses: dawidd6/action-download-artifact@v2
-        with: 
-          workflow: build-artifacts.yml
-          workflow_conclusion: success
-          name: upcontracts.jar
-          path: java/build/libs/upcontracts.jar
-          branch: main
-          event: push
+      # - name: Download artifact
+      #   uses: dawidd6/action-download-artifact@v2
+      #   with: 
+      #     workflow: build-artifacts.yml
+      #     workflow_conclusion: success
+      #     name: upcontracts.jar
+      #     path: java/build/libs/upcontracts.jar
+      #     branch: main
+      #     event: push
 
       # iOS artifacts
       - name: Download artifact
@@ -74,7 +74,7 @@ jobs:
 
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "ios/UPContractsAbi.swift,java/build/libs/upcontracts.jar"
+          artifacts: "ios/UPContractsAbi.swift"
           bodyFile: "RELEASENOTES.md"
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ env.APP_VERSION }}
