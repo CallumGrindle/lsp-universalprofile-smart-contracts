@@ -22,16 +22,18 @@ jobs:
           branch: main
           event: push
 
-      - name: Push latest iOS artifacts to 'universalprofile-ios-sdk' repo
-        if: steps.check.outputs.changed == 'true'
-        run: |
-          git clone https://.:${{ secrets.IOSSDK_GITHUB_REPO_KEY }}@github.com/lukso-network/universalprofile-ios-sdk.git
-          cd universalprofile-ios-sdk
-          git config --global user.email "release@lukso.network"
-          git config --global user.name "LUKSO Bot"
-          git push origin --delete abi-update-release
-          git checkout -b abi-update-release
-          cp ../ios/UPContractsAbi.swift universalprofile-ios-sdk/UPContractsAbi.swift
-          git add .
-          git commit -m "Automatic publish new contracts abis from lukso-network/lsp-universalprofile-smart-contracts"
-          git push --set-upstream origin abi-update-release
+      - run: ls -R
+
+      # - name: Push latest iOS artifacts to 'universalprofile-ios-sdk' repo
+      #   if: steps.check.outputs.changed == 'true'
+      #   run: |
+      #     git clone https://.:${{ secrets.IOSSDK_GITHUB_REPO_KEY }}@github.com/lukso-network/universalprofile-ios-sdk.git
+      #     cd universalprofile-ios-sdk
+      #     git config --global user.email "release@lukso.network"
+      #     git config --global user.name "LUKSO Bot"
+      #     git push origin --delete abi-update-release
+      #     git checkout -b abi-update-release
+      #     cp ../ios/UPContractsAbi.swift universalprofile-ios-sdk/UPContractsAbi.swift
+      #     git add .
+      #     git commit -m "Automatic publish new contracts abis from lukso-network/lsp-universalprofile-smart-contracts"
+      #     git push --set-upstream origin abi-update-release
