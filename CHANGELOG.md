@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.2-alpha.5.0](https://github.com/lukso-network/universalprofile-smart-contracts/compare/v0.4.2-alpha.1.0...v0.4.2-alpha.5.0) (2021-12-17)
+
 ### [0.4.2-alpha.4.0](https://github.com/lukso-network/universalprofile-smart-contracts/compare/v0.4.2-alpha.3.0...v0.4.2-alpha.4.0) (2021-12-17)
 
 ### [0.4.2-alpha.3.0](https://github.com/lukso-network/universalprofile-smart-contracts/compare/v0.4.2-alpha.1.0...v0.4.2-alpha.3.0) (2021-12-16)
